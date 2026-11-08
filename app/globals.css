@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+/* Cinematic layout only applies when the pinned scroll sequence can run. */
+@custom-variant cine {
+  @media (min-width: 1024px) and (min-height: 620px) and (prefers-reduced-motion: no-preference) {
+    html.js & {
+      @slot;
+    }
+  }
+}
+
+@theme inline {
+  --font-display: var(--font-shoulders), "Arial Narrow", Impact, sans-serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --color-ink: #0a0b0d;
+  --color-panel: #121418;
+  --color-line: #2a2e36;
+  --color-paper: #ece8df;
+  --color-dim: #a3a8b1;
+  --color-pending: #7f8590;
+
+  /* Colour is reserved for CI status, so it always means something. */
+  --color-run: #ffb224;
+  --color-pass: #35e6a5;
+  --color-fail: #ff6a5e;
+}
+
+@layer base {
+  html {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-pass);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-run);
+    outline-offset: 3px;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-stopped { overflow: clip; }
+
+/* ---------- Name ---------- */
+.name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.87;
+  font-size: 28.5vw;
+}
+.cine-name-size { font-size: min(29.5vw, 45svh); }
+
+/* Ghost outline until the particles fill it in. */
+html.fx .name {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(236 232 223 / 0.2);
+}
+
+/* ---------- Pipeline status ---------- */
+[data-panel] { --p: 1; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--pill, var(--color-pass));
+  transition: color 0.25s;
+}
+.pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pill::after { content: "passed"; }
+[data-state="pending"] .pill { --pill: var(--color-pending); }
+[data-state="pending"] .pill::after { content: "queued"; }
+[data-state="running"] .pill { --pill: var(--color-run); }
+[data-state="running"] .pill::before { animation: blink 0.9s steps(2) infinite; }
+[data-state="running"] .pill::after { content: "running"; }
+
+@keyframes blink { 50% { opacity: 0.25; } }
+
+.panel-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.86;
+  text-transform: uppercase;
+  font-size: clamp(60px, 17vw, 112px);
+  /* Each title wipes in as the build reaches its stage. */
+  clip-path: inset(-10% calc((1 - min(1, var(--p) * 2.6)) * 100%) -10% 0);
+}
+.cine-panel-title { font-size: min(8.4vw, 16.5vh); }
+.cine-release-title { font-size: min(10.2vw, 24vh); }
+
+/* A 0 to 1 value for one item in a staggered sequence: set --i and --n. */
+.seq {
+  --on: clamp(0, calc((var(--p) - 0.08 - var(--i) / var(--n) * 0.8) * var(--n) * 1.6), 1);
+}
+.seq-fill {
+  background: color-mix(in oklab, var(--color-pass) calc(var(--on) * 100%), var(--color-line));
+}
+.seq-text {
+  color: color-mix(in oklab, var(--color-paper) calc(var(--on) * 100%), var(--color-pending));
+}
+
+.rail-node {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-pending);
+  background: var(--color-ink);
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+[data-state="running"] > .rail-node {
+  border-color: var(--color-run);
+  box-shadow: 0 0 0 4px rgb(255 178 36 / 0.2);
+}
+[data-state="passed"] > .rail-node {
+  border-color: var(--color-pass);
+  background: var(--color-pass);
+}
+.rail-label { color: var(--color-pending); transition: color 0.25s; }
+[data-state="running"] > .rail-label { color: var(--color-run); }
+[data-state="passed"] > .rail-label { color: var(--color-paper); }
+
+/* ---------- Command palette ---------- */
+[cmdk-overlay] {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgb(10 11 13 / 0.72);
+  backdrop-filter: blur(6px);
+}
+[cmdk-dialog] {
+  position: fixed;
+  z-index: 61;
+  top: 14vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, calc(100vw - 32px));
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgb(0 0 0 / 0.6);
+}
+[cmdk-input] {
+  width: 100%;
+  padding: 18px 20px;
+  background: transparent;
+  outline: none;
+  border-bottom: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--color-paper);
+}
+[cmdk-input]::placeholder { color: var(--color-pending); }
+[cmdk-list] {
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+  padding: 8px;
+  overscroll-behavior: contain;
+}
+[cmdk-group-heading] {
+  padding: 10px 12px 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-pending);
+}
+[cmdk-item] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+[cmdk-item][data-selected="true"] {
+  background: var(--color-pass);
+  color: var(--color-ink);
+}
+[cmdk-empty] {
+  padding: 24px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-dim);
+}

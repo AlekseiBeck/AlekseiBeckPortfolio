@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+.playwright-mcp
+
+# Private resume with phone number. The public copy is public/AlekseiBeck-Resume.pdf
+/AlekseiBeckResume2026.pdf
