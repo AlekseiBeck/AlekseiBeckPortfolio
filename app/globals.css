@@ -1,49 +1,48 @@
 @import "tailwindcss";
 
-/* Cinematic layout only applies when the pinned scroll sequence can run. */
-@custom-variant cine {
-  @media (min-width: 1024px) and (min-height: 620px) and (prefers-reduced-motion: no-preference) {
-    html.js & {
-      @slot;
-    }
-  }
-}
-
+/*
+  One printed colour, like a bank form: blue is the form itself (rules, labels),
+  black is what was filled in, red is only ever a stamp.
+*/
 @theme inline {
-  --font-display: var(--font-shoulders), "Arial Narrow", Impact, sans-serif;
-  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-sans: var(--font-franklin), "Franklin Gothic Medium", "Helvetica Neue", Arial, sans-serif;
+  --font-type: var(--font-courier), "Courier New", Courier, monospace;
 
-  --color-ink: #0a0b0d;
-  --color-panel: #121418;
-  --color-line: #2a2e36;
-  --color-paper: #ece8df;
-  --color-dim: #a3a8b1;
-  --color-pending: #7f8590;
-
-  /* Colour is reserved for CI status, so it always means something. */
-  --color-run: #ffb224;
-  --color-pass: #35e6a5;
-  --color-fail: #ff6a5e;
+  --color-paper: #eef0ec;
+  --color-sheet: #fbfcf9;
+  --color-ink: #15171c;
+  --color-soft: #545a66;
+  --color-form: #1b2f9e;
+  --color-stamp: #c62a1c;
 }
 
 @layer base {
   html {
-    background: var(--color-ink);
-    color: var(--color-paper);
+    /* Everything is sized in rem, so large monitors scale the whole page up a little. */
+    font-size: clamp(100%, calc(50% + 0.5vw), 125%);
+    background: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    scroll-padding-top: 4.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
   body {
     overflow-x: clip;
   }
   ::selection {
-    background: var(--color-pass);
-    color: var(--color-ink);
+    background: var(--color-form);
+    color: var(--color-sheet);
   }
   :focus-visible {
-    outline: 2px solid var(--color-run);
+    outline: 2px solid var(--color-form);
     outline-offset: 3px;
   }
   button {
@@ -51,157 +50,178 @@
   }
 }
 
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-stopped { overflow: clip; }
-
-/* ---------- Name ---------- */
-.name {
-  font-family: var(--font-display);
-  font-weight: 900;
-  line-height: 0.87;
-  font-size: 28.5vw;
-}
-.cine-name-size { font-size: min(29.5vw, 45svh); }
-
-/* Ghost outline until the particles fill it in. */
-html.fx .name {
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(236 232 223 / 0.2);
-}
-
-/* ---------- Pipeline status ---------- */
-[data-panel] { --p: 1; }
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--pill, var(--color-pass));
-  transition: color 0.25s;
-}
-.pill::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-}
-.pill::after { content: "passed"; }
-[data-state="pending"] .pill { --pill: var(--color-pending); }
-[data-state="pending"] .pill::after { content: "queued"; }
-[data-state="running"] .pill { --pill: var(--color-run); }
-[data-state="running"] .pill::before { animation: blink 0.9s steps(2) infinite; }
-[data-state="running"] .pill::after { content: "running"; }
-
-@keyframes blink { 50% { opacity: 0.25; } }
-
-.panel-title {
-  font-family: var(--font-display);
-  font-weight: 900;
-  line-height: 0.86;
-  text-transform: uppercase;
-  font-size: clamp(60px, 17vw, 112px);
-  /* Each title wipes in as the build reaches its stage. */
-  clip-path: inset(-10% calc((1 - min(1, var(--p) * 2.6)) * 100%) -10% 0);
-}
-.cine-panel-title { font-size: min(8.4vw, 16.5vh); }
-.cine-release-title { font-size: min(10.2vw, 24vh); }
-
-/* A 0 to 1 value for one item in a staggered sequence: set --i and --n. */
-.seq {
-  --on: clamp(0, calc((var(--p) - 0.08 - var(--i) / var(--n) * 0.8) * var(--n) * 1.6), 1);
-}
-.seq-fill {
-  background: color-mix(in oklab, var(--color-pass) calc(var(--on) * 100%), var(--color-line));
-}
-.seq-text {
-  color: color-mix(in oklab, var(--color-paper) calc(var(--on) * 100%), var(--color-pending));
-}
-
-.rail-node {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-pending);
-  background: var(--color-ink);
-  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
-}
-[data-state="running"] > .rail-node {
-  border-color: var(--color-run);
-  box-shadow: 0 0 0 4px rgb(255 178 36 / 0.2);
-}
-[data-state="passed"] > .rail-node {
-  border-color: var(--color-pass);
-  background: var(--color-pass);
-}
-.rail-label { color: var(--color-pending); transition: color 0.25s; }
-[data-state="running"] > .rail-label { color: var(--color-run); }
-[data-state="passed"] > .rail-label { color: var(--color-paper); }
-
-/* ---------- Command palette ---------- */
-[cmdk-overlay] {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  background: rgb(10 11 13 / 0.72);
-  backdrop-filter: blur(6px);
-}
-[cmdk-dialog] {
-  position: fixed;
-  z-index: 61;
-  top: 14vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(600px, calc(100vw - 32px));
-  background: var(--color-panel);
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 40px 120px rgb(0 0 0 / 0.6);
-}
-[cmdk-input] {
+@utility wrap {
   width: 100%;
-  padding: 18px 20px;
+  max-width: 82rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 40rem) {
+    padding-inline: 2rem;
+  }
+  @media (min-width: 64rem) {
+    padding-inline: 3rem;
+  }
+}
+
+/* The small printed caption above a form field. */
+@utility label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-form);
+}
+
+/* ---------- Masthead ---------- */
+.masthead {
+  container-type: inline-size;
+}
+.name {
+  font-weight: 900;
+  font-size: 17cqw;
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+  color: var(--color-form);
+  /* Optical alignment: pull the A's side bearing back to the margin. */
+  margin-left: -0.035em;
+}
+
+/* ---------- Links ---------- */
+.link {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-form) 45%, transparent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color 0.15s, color 0.15s;
+}
+.link:hover {
+  color: var(--color-form);
+  text-decoration-color: var(--color-form);
+}
+
+/* ---------- Stamps ---------- */
+.stamp {
+  --r: -4deg;
+  display: inline-block;
+  border: 0.14em solid currentColor;
+  border-radius: 0.18em;
+  padding: 0.22em 0.5em 0.18em;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-stamp);
+  transform: rotate(var(--r));
+}
+/* Uneven inking. Only on stamps big enough to survive it. */
+.inked {
+  filter: url(#ink);
+}
+.seal {
+  --r: 11deg;
+  color: var(--color-stamp);
+  transform: rotate(var(--r));
+  mix-blend-mode: multiply;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* The name prints, then gets stamped. */
+  .name {
+    animation: print 0.7s cubic-bezier(0.6, 0, 0.2, 1) both;
+  }
+  .thunk {
+    animation: thunk 0.26s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  }
+  .seal.thunk {
+    animation-duration: 0.32s;
+    animation-delay: 0.75s;
+  }
+}
+@keyframes print {
+  from {
+    clip-path: inset(-10% 100% -10% -5%);
+  }
+  to {
+    clip-path: inset(-10% -5% -10% -5%);
+  }
+}
+@keyframes thunk {
+  from {
+    opacity: 0;
+    transform: rotate(var(--r)) scale(1.7);
+  }
+  65% {
+    opacity: 1;
+    transform: rotate(var(--r)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--r)) scale(1);
+  }
+}
+
+/* ---------- Range input ---------- */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 2.25rem;
+  margin: 0;
   background: transparent;
-  outline: none;
-  border-bottom: 1px solid var(--color-line);
-  font-family: var(--font-mono);
-  font-size: 16px;
-  color: var(--color-paper);
-}
-[cmdk-input]::placeholder { color: var(--color-pending); }
-[cmdk-list] {
-  max-height: min(420px, 60vh);
-  overflow-y: auto;
-  padding: 8px;
-  overscroll-behavior: contain;
-}
-[cmdk-group-heading] {
-  padding: 10px 12px 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--color-pending);
-}
-[cmdk-item] {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 11px 12px;
-  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  /* A vertical swipe that starts on a slider should still scroll the page. */
+  touch-action: pan-y;
+  --track: linear-gradient(
+    to right,
+    var(--color-form) var(--fill),
+    color-mix(in srgb, var(--color-form) 22%, transparent) var(--fill)
+  );
 }
-[cmdk-item][data-selected="true"] {
-  background: var(--color-pass);
-  color: var(--color-ink);
+.range:focus-visible {
+  outline-offset: 0;
 }
-[cmdk-empty] {
-  padding: 24px;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--color-dim);
+.range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--track);
+}
+.range::-moz-range-track {
+  height: 2px;
+  background: var(--track);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: calc(1px - 0.5625rem);
+  border: 2px solid var(--color-form);
+  border-radius: 50%;
+  background: var(--color-sheet);
+  transition: background 0.12s, transform 0.12s;
+}
+.range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--color-form);
+  border-radius: 50%;
+  background: var(--color-sheet);
+  transition: background 0.12s, transform 0.12s;
+}
+.range:hover::-webkit-slider-thumb,
+.range:active::-webkit-slider-thumb {
+  background: var(--color-form);
+}
+.range:hover::-moz-range-thumb,
+.range:active::-moz-range-thumb {
+  background: var(--color-form);
+}
+.range:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+.range:active::-moz-range-thumb {
+  transform: scale(1.2);
 }

@@ -8,3 +8,6 @@ next-env.d.ts
 
 # Private resume with phone number. The public copy is public/AlekseiBeck-Resume.pdf
 /AlekseiBeckResume2026.pdf
+
+# Written by `next dev` for coding agents. Local only.
+AGENTS.md
