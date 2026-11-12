@@ -4,11 +4,43 @@ import { Fragment, useEffect, useRef, useState } from "react";
 
 const STAGES = ["Intake", "Credit", "Income", "Property", "Insurance", "Closing"];
 
-// Invented loans. `stop` is the index of the stage that fails, or null when the loan clears.
-const LOANS: { number: string; stop: number | null; why?: string }[] = [
-  { number: "0417", stop: 3, why: "no appraised value on the file" },
-  { number: "0932", stop: 1, why: "credit report came back empty" },
-  { number: "1288", stop: null },
+// Invented loans, calls and error text. `stop` is the index of the stage that fails, or null when the loan clears.
+const LOANS: { number: string; stop: number | null; call: string; response: string; message: string }[] = [
+  {
+    number: "0417",
+    stop: 3,
+    call: "GetLoanFacts",
+    response: "500 Internal Server Error",
+    message: 'NullReferenceException building fact "LoanToValue": Property.AppraisedValue is null.',
+  },
+  {
+    number: "0932",
+    stop: 1,
+    call: "GetLoanRules",
+    response: "400 Bad Request",
+    message: "Borrowers[1].CreditReportId: The CreditReportId field is required.",
+  },
+  {
+    number: "0655",
+    stop: 0,
+    call: "GetBorrowerInformation",
+    response: "404 Not Found",
+    message: "Borrower 2 not found. Loan 0655 lists 2 borrowers but has 1 borrower record.",
+  },
+  {
+    number: "1103",
+    stop: 4,
+    call: "RunInsuranceRules",
+    response: "500 Internal Server Error",
+    message: 'InvalidOperationException in rule "FloodPolicyRequired": Sequence contains no elements.',
+  },
+  {
+    number: "1288",
+    stop: null,
+    call: "GetLoanRules",
+    response: "200 OK",
+    message: "No errors. Every call on this loan returned 200.",
+  },
 ];
 
 const STEP_MS = 340;
@@ -23,7 +55,7 @@ export default function TraceDemo() {
   // Stages that have reported back so far. -1 until the first trace starts.
   const [step, setStep] = useState(-1);
 
-  const { number, stop, why } = LOANS[loan];
+  const { number, stop, call, response, message } = LOANS[loan];
   const done = step >= lastStep(stop);
 
   const trace = (i: number) => {
@@ -64,14 +96,14 @@ export default function TraceDemo() {
 
   return (
     <figure ref={figure} className="mt-8 max-w-[40rem]">
-      <div role="group" aria-label="Sample loan" className="grid grid-cols-3 gap-1 sm:flex">
+      <div role="group" aria-label="Sample loan" className="grid grid-cols-5 gap-1">
         {LOANS.map((l, i) => (
           <button
             key={l.number}
             type="button"
             aria-pressed={loan === i}
             onClick={() => trace(i)}
-            className={`min-h-11 border border-b-0 border-form px-2 py-2 text-[0.8125rem] font-semibold leading-tight transition-colors sm:px-5 sm:text-[0.875rem] ${loan === i ? "bg-form text-sheet" : "bg-sheet/50 text-form hover:bg-sheet"}`}
+            className={`min-h-11 border border-b-0 border-form px-1 py-2 text-[0.8125rem] font-semibold leading-tight transition-colors sm:text-[0.875rem] ${loan === i ? "bg-form text-sheet" : "bg-sheet/50 text-form hover:bg-sheet"}`}
           >
             Loan {l.number}
           </button>
@@ -117,26 +149,46 @@ export default function TraceDemo() {
           })}
         </div>
 
-        <p aria-live="polite" className="min-h-[5.75rem] border-t border-form/25 px-4 py-3 leading-snug sm:min-h-[4.5rem] sm:px-6">
-          {step < 0 ? null : !done ? (
-            <span className="font-type text-soft">Tracing loan {number}…</span>
-          ) : stop === null ? (
-            <>
-              <strong className="font-bold text-form">Cleared all {STAGES.length} stages.</strong> Whatever is wrong
-              with loan {number}, it isn&apos;t the pipeline.
-            </>
-          ) : (
-            <>
-              <strong className="font-bold text-stamp">Stopped at {STAGES[stop]}</strong>, stage {stop + 1} of{" "}
-              {STAGES.length}: {why}. Nothing after it ran.
-            </>
-          )}
-        </p>
+        <div aria-live="polite" className="border-t border-form/25">
+          <p className="min-h-[5.75rem] px-4 py-3 leading-snug sm:min-h-[4.5rem] sm:px-6">
+            {step < 0 ? null : !done ? (
+              <span className="font-type text-soft">Tracing loan {number}…</span>
+            ) : stop === null ? (
+              <>
+                <strong className="font-bold text-form">Cleared all {STAGES.length} stages.</strong> Whatever is wrong
+                with loan {number}, it isn&apos;t the pipeline.
+              </>
+            ) : (
+              <>
+                <strong className="font-bold text-stamp">Stopped at {STAGES[stop]}</strong>, stage {stop + 1} of{" "}
+                {STAGES.length}. Nothing after it ran.
+              </>
+            )}
+          </p>
+
+          {/* What came back from the call the trace ended on. */}
+          <dl className="grid border-t border-form/25 font-type text-[0.875rem] leading-snug sm:grid-cols-2">
+            <div className="border-b border-form/25 px-4 py-2.5 sm:border-r sm:px-6">
+              <dt className="label font-sans">{stop === null ? "Last call" : "Failed call"}</dt>
+              <dd className="mt-1">{done ? call : "…"}</dd>
+            </div>
+            <div className="border-b border-form/25 px-4 py-2.5 sm:px-6">
+              <dt className="label font-sans">Response</dt>
+              <dd className={`mt-1 ${done ? `font-bold ${stop === null ? "text-form" : "text-stamp"}` : ""}`}>
+                {done ? response : "…"}
+              </dd>
+            </div>
+            <div className="px-4 py-2.5 sm:col-span-2 sm:px-6">
+              <dt className="label font-sans">Message</dt>
+              <dd className="mt-1 min-h-[4lh] [overflow-wrap:anywhere] sm:min-h-[2lh]">{done ? message : "…"}</dd>
+            </div>
+          </dl>
+        </div>
       </div>
 
       <figcaption className="mt-2.5 text-[0.875rem] leading-snug text-soft">
-        A sketch of the idea: follow one loan stage by stage and stop where it broke. These loans and stage names are
-        invented. The real screens are internal, so there are no screenshots.
+        A sketch of the idea: follow one loan stage by stage, stop where it broke, and show what came back. The loans,
+        stage names, calls and errors here are invented. The real screens are internal, so there are no screenshots.
       </figcaption>
     </figure>
   );
