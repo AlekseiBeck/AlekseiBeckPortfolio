@@ -3,6 +3,8 @@ export const LINKS = {
   linkedin: "https://linkedin.com/in/alekseibeck",
   github: "https://github.com/AlekseiBeck",
   stakdx: "https://stakdx.vercel.app",
+  nbaAgent: "https://github.com/AlekseiBeck/nba-agent",
+  airfare: "https://github.com/AlekseiBeck/us-airfare-analytics",
   resume: "/AlekseiBeck-Resume.pdf",
 };
 
@@ -14,15 +16,29 @@ export const SECTIONS = [
 ];
 
 export const TOOLS = [
-  { group: ".NET", items: ["C#", ".NET", "EF Core", "xUnit", "SQL Server", "SSMS"] },
-  { group: "Web", items: ["TypeScript", "JavaScript", "React", "Next.js", "Node.js", "HTML/CSS", "REST APIs", "OAuth"] },
-  { group: "Other languages", items: ["Python", "C++", "SQL"] },
+  { group: "Languages", items: ["C#", "TypeScript", "JavaScript", "Python", "SQL", "PowerShell", "C++"] },
+  {
+    group: ".NET and backend",
+    items: [".NET", "EF Core", "Dapper", "NRules", "WPF", "SQL Server", "Kafka", "Node.js", "REST APIs", "OpenAPI", "OAuth"],
+  },
+  {
+    group: "Testing",
+    items: ["xUnit", "Moq", "FluentAssertions", "WireMock", "Pact", "k6", "Testkube", "pytest", "mutation testing", "SonarQube"],
+  },
+  {
+    group: "Frontend",
+    items: ["React", "Next.js", "Tailwind CSS", "HTML/CSS", "Electron", "Three.js", "React Three Fiber", "WebGL/GLSL", "GSAP"],
+  },
+  {
+    group: "Data and analytics",
+    items: ["dbt", "DuckDB", "SQLite", "pandas", "SciPy", "statsmodels", "Jupyter", "Apache Parquet", "Tableau"],
+  },
   {
     group: "Cloud and DevOps",
-    items: ["Azure", "Vercel", "Railway", "Supabase", "Docker", "Jenkins", "CI/CD", "Dynatrace", "Git", "GitHub", "Bitbucket", "Jira"],
+    items: ["Azure", "Vercel", "Railway", "Cloudflare", "Supabase", "Docker", "Jenkins", "GitHub Actions", "Dynatrace", "Git", "Jira"],
   },
   {
     group: "AI / LLM",
-    items: ["Custom Claude Code and GitHub Copilot agents, skills, and instructions", "LLM integration", "Prompt engineering"],
+    items: ["Claude API", "tool-use agents", "LLM evaluation", "custom Claude Code and GitHub Copilot agents and skills"],
   },
 ];

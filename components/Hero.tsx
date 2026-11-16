@@ -20,7 +20,7 @@ export default function Hero() {
       <div className="mt-8 grid gap-x-8 gap-y-8 sm:mt-10 lg:grid-cols-12">
         <p className="text-[clamp(1.3125rem,2.5vw,2rem)] font-medium leading-[1.28] tracking-[-0.015em] text-pretty lg:col-span-8">
           I&apos;m a software developer at United Wholesale Mortgage. I write the rules that read a loan and raise
-          conditions for underwriters, the matching code behind them, and the tests that let all of it ship.
+          conditions for underwriters, the services behind them, and the tests that let all of it ship.
         </p>
         <div className="flex items-end justify-between gap-6 lg:col-span-4 lg:flex-col lg:items-end">
           {/* Above the links on wide screens, beside them on narrow ones. */}

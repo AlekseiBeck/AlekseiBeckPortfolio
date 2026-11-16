@@ -32,10 +32,88 @@ function Project({ name, meta, children }: { name: string; meta: [string, ReactN
 
 const prose = "max-w-[40rem] text-[1.0625rem] leading-[1.6] text-pretty";
 
+/** nba-agent, the run of 15 November 2026. Shares of the questions asked, in percent. */
+const EVAL = [
+  {
+    setup: "With the database",
+    questions: 72,
+    right: 100,
+    wrong: 0,
+    note: "100% right. 95% interval 95 to 100. $0.0006 per question.",
+  },
+  {
+    setup: "From memory, no database",
+    questions: 63,
+    right: 33,
+    wrong: 19,
+    note: "33% right, 19% wrong, 48% declined. 95% interval 23 to 46.",
+  },
+];
+
+function EvalResult() {
+  return (
+    <figure className="mt-8 max-w-[40rem]">
+      <div className="border border-form bg-sheet">
+        {EVAL.map((row) => (
+          <div key={row.setup} className="border-t border-form/25 px-4 py-4 first:border-t-0 sm:px-6">
+            <p className="label flex flex-wrap items-baseline justify-between gap-x-4">
+              {row.setup}
+              <span className="font-type text-[0.875rem] font-normal normal-case tracking-normal text-soft">
+                {row.questions} questions
+              </span>
+            </p>
+            <div className="mt-2.5 flex items-center gap-4">
+              <p className="w-[5.25rem] shrink-0 font-type text-[2rem] font-bold leading-none">{row.right}%</p>
+              <div aria-hidden className="flex h-3 flex-1 bg-form/15">
+                <span className="bg-form" style={{ width: `${row.right}%` }} />
+                <span className="bg-stamp" style={{ width: `${row.wrong}%` }} />
+              </div>
+            </div>
+            <p className="mt-2.5 font-type text-[0.875rem] leading-snug text-soft">{row.note}</p>
+          </div>
+        ))}
+      </div>
+      <figcaption className="mt-2.5 text-[0.875rem] leading-snug text-soft">
+        Claude Haiku 5.5, one pass over every question. Blue is right, red is wrong, and the empty part is where the
+        model declined to answer. The nine questions the database can&apos;t answer are left out of the memory run.
+      </figcaption>
+    </figure>
+  );
+}
+
+/** us-airfare-analytics. One-way, passenger-weighted median fares in 2024 dollars. */
+const FARES = [
+  ["Median fare, after inflation", "$257 in 2015, $200 in 2024"],
+  ["Cheapest New York airport", "LaGuardia at $183, then JFK at $198 and Newark at $200"],
+  ["Against the average carrier", "Spirit 52% below, Delta 23% above"],
+  ["Check against federal averages", "0.41% median difference, 2016 to 2024"],
+];
+
+function FareFindings() {
+  return (
+    <figure className="mt-8 max-w-[40rem]">
+      <dl className="grid border-l border-t border-form bg-sheet sm:grid-cols-2">
+        {FARES.map(([label, value]) => (
+          <div key={label} className="border-b border-r border-form px-4 pb-3 pt-2.5">
+            <dt className="label">{label}</dt>
+            <dd className="mt-1.5 font-type text-[1rem] leading-snug">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <figcaption className="mt-2.5 text-[0.875rem] leading-snug text-soft">
+        Fares are one way, before bag and seat fees. The carrier gaps compare the same route and quarter, and the New
+        York figures are since 2023.
+      </figcaption>
+    </figure>
+  );
+}
+
+const lead = "mt-5 max-w-[34rem] text-[1.3125rem] font-medium leading-[1.35] tracking-[-0.01em] text-pretty";
+
 export default function Projects() {
   return (
     <section id="projects" className="wrap mt-28 lg:mt-40">
-      <SectionHead n={3} label="Projects" title="One tool for work, one for myself" />
+      <SectionHead n={3} label="Projects" title="One tool for work, three for myself" />
 
       <div className="mt-12 lg:mt-16">
         <Project
@@ -47,7 +125,7 @@ export default function Projects() {
             ["Stack", "C#, .NET, EF Core, SQL Server, TypeScript, React, OAuth"],
           ]}
         >
-          <p className="mt-5 max-w-[34rem] text-[1.3125rem] font-medium leading-[1.35] tracking-[-0.01em] text-pretty">
+          <p className={lead}>
             Working out what state a loan was in used to take hours of manual digging. Now it takes one lookup.
           </p>
           <TraceDemo />
@@ -73,6 +151,85 @@ export default function Projects() {
         </Project>
 
         <Project
+          name="NBA Stats Agent and Eval Harness"
+          meta={[
+            ["Where", "Personal project"],
+            ["When", "November 2026 to present"],
+            [
+              "Code",
+              <a key="code" href={LINKS.nbaAgent} target="_blank" rel="noreferrer" className="link">
+                AlekseiBeck/
+                <wbr />
+                nba-agent
+              </a>,
+            ],
+            ["Stack", "Python, Claude API, SQLite, pytest"],
+          ]}
+        >
+          <p className={lead}>
+            An LLM agent that answers NBA questions by writing SQL, and the harness that measures how often it is
+            right.
+          </p>
+          <EvalResult />
+          <div className={`mt-8 space-y-4 ${prose}`}>
+            <p>
+              The agent is a loop around the Claude API with two tools. One runs a read-only query against a 112K-row
+              box-score database covering four seasons, and the other submits the answer. When a query fails, it reads
+              the SQL error and corrects itself.
+            </p>
+            <p>
+              The harness grades it on 72 questions whose answers are computed by code from the same database, with no
+              LLM judge. Nine of them can&apos;t be answered from the data at all, which catches an agent that guesses
+              when it should decline. 34 tests verify the grader.
+            </p>
+            <p>
+              With the database, the model got all 72 right. Answering from memory, the same model got a third right,
+              and about one in three of the answers it did commit to was wrong. A perfect score also means the question
+              set is too easy for this agent, so harder questions are the next step.
+            </p>
+          </div>
+        </Project>
+
+        <Project
+          name="US Airfare Analytics"
+          meta={[
+            ["Where", "Personal project"],
+            ["When", "November 2026 to present"],
+            [
+              "Code",
+              <a key="code" href={LINKS.airfare} target="_blank" rel="noreferrer" className="link">
+                AlekseiBeck/
+                <wbr />
+                us-airfare-analytics
+              </a>,
+            ],
+            ["Stack", "Python, SQL, dbt, DuckDB, pandas, statsmodels, Tableau, GitHub Actions"],
+          ]}
+        >
+          <p className={lead}>
+            When, where, and on which airline are U.S. domestic flights cheapest? A pipeline over 272 million DOT
+            ticket records, 2015 to mid-2025.
+          </p>
+          <FareFindings />
+          <div className={`mt-8 space-y-4 ${prose}`}>
+            <p>
+              Python ingests the raw federal files into Parquet and DuckDB. From there, 23 dbt models with 54 data
+              tests clean the records, adjust fares for inflation, and compute passenger-weighted fare metrics by
+              route, airline, and quarter.
+            </p>
+            <p>
+              The featured case study is Detroit to New York. Since 2023 the cheapest nonstop has been Spirit to Newark
+              at a median of $69 before fees. Among airlines that are not ultra-low-cost, it is American to LaGuardia
+              at $151.
+            </p>
+            <p>
+              The same models feed the analysis notebooks and the extracts for a Tableau dashboard. The data is
+              quarterly, so it can&apos;t say which week is cheapest or how far ahead to book.
+            </p>
+          </div>
+        </Project>
+
+        <Project
           name="Stakdx"
           meta={[
             ["Where", "Personal project"],
@@ -86,7 +243,7 @@ export default function Projects() {
             ["Stack", "TypeScript, React, Supabase, Finnhub, Claude API, Alpaca API"],
           ]}
         >
-          <p className="mt-5 max-w-[34rem] text-[1.3125rem] font-medium leading-[1.35] tracking-[-0.01em] text-pretty">
+          <p className={lead}>
             A trading assistant. Give it a budget and it returns ranked longs, shorts, calls, and puts, each scored by
             confidence.
           </p>

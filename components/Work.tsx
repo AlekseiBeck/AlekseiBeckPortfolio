@@ -4,67 +4,98 @@ import SectionHead from "./SectionHead";
 // Each row opens with one filled-in field, the same way the loan file prints its figures.
 const ROWS: { label: string; value: ReactNode; title: string; body: ReactNode }[] = [
   {
+    label: "Rules written or reworked",
+    value: "20+",
+    title: "Rules that read the loan",
+    body: (
+      <>
+        I&apos;ve written or reworked more than 20 C# rules on NRules for BOLT, UWM&apos;s underwriting platform. They
+        evaluate loan data and fire the conditions underwriters see, for condo and master-policy insurance and for FHA
+        mortgage history.
+      </>
+    ),
+  },
+  {
+    label: "Pull requests merged",
+    value: "168",
+    title: "From the database to the UI",
+    body: (
+      <>
+        168 merged pull requests across about 30 repositories, and 174 Jira issues closed. The features run from SQL
+        Server stored procedures and EF Core and Dapper services through REST APIs to the React UI. I&apos;ve also
+        reviewed 239 of my teammates&apos; pull requests.
+      </>
+    ),
+  },
+  {
+    label: "Traced to",
+    value: (
+      <span className="block text-[1rem] font-normal leading-relaxed">
+        a JSON deserialization
+        <br />
+        default
+      </span>
+    ),
+    title: "A crash in the credit rules",
+    body: (
+      <>
+        A null-reference crash was aborting the entire credit rule session and blocking the affected loans from
+        advancing. I traced it to a JSON deserialization default and shipped the guard with regression tests.
+      </>
+    ),
+  },
+  {
+    label: "Mutation score",
+    value: "99.4%",
+    title: "Ready for continuous deployment",
+    body: (
+      <>
+        I took a core microservice through all 15 criteria of its production-readiness checklist for continuous
+        deployment. Its mutation score rose to 99.4% (713 of 720 mutants killed) and integration coverage from 80% to
+        84%. I added Pact contract tests, plus k6 smoke and load tests that run in Testkube in every environment.
+      </>
+    ),
+  },
+  {
+    label: "Services, one click",
+    value: "6",
+    title: "A launcher for the local stack",
+    body: (
+      <>
+        On my own I built a C#/.NET 10 WPF launcher that starts a six-service local stack in one click. It clones the
+        repositories, isolates each developer&apos;s Kafka topics, auto-corrects about 20 config mismatches per fresh
+        clone, and starts the services in dependency order. It is about 16,000 lines with about 620 xUnit tests, and
+        has had three team releases.
+      </>
+    ),
+  },
+  {
+    label: "Stored per match",
+    value: (
+      <span className="block text-[1rem] font-normal leading-relaxed">
+        liability → tradeline
+        <br />
+        confirmed, or not
+      </span>
+    ),
+    title: "An audit trail for AI matching",
+    body: (
+      <>
+        I built the persistence and audit layer for LLM-driven tradeline matching: the EF Core migrations and
+        repository code that store each AI-proposed liability-to-tradeline match and whether an underwriter confirmed
+        it.
+      </>
+    ),
+  },
+  {
     label: "Code smells removed",
     value: "~1,900",
     title: "Code quality across BOLT",
     body: (
       <>
-        My intern group took on code quality in BOLT. Across 34+ microservices we cleared about 1,900 code smells and
-        raised test coverage from roughly 70% to over 80%. It won <strong>Most Valuable Project</strong> out of 16
-        intern groups, and the README standards I wrote became an official UWM engineering convention.
-      </>
-    ),
-  },
-  {
-    label: "Rules in the BOLT rule engine",
-    value: "15",
-    title: "Rules that read the loan",
-    body: (
-      <>
-        I wrote and maintain 15 C# rules on NRules. They evaluate the loan object (property, insurance, income,
-        tradelines, liabilities) and fire the conditions underwriters see. When Freddie Mac or an investor changes a
-        guideline, the rules have to follow.
-      </>
-    ),
-  },
-  {
-    label: "Matches",
-    value: (
-      <span className="block text-[1rem] font-normal leading-relaxed">
-        liability → tradeline
-        <br />
-        document → debt risk
-      </span>
-    ),
-    title: "Matching",
-    body: (
-      <>
-        C# matching algorithms that link a borrower&apos;s liabilities to the tradelines on their credit report, and
-        loan documents to specific debt-related risks. Part of it is parsing LLM responses. Underneath are EF Core data
-        access changes and SQL migration scripts.
-      </>
-    ),
-  },
-  {
-    label: "BOLT repositories",
-    value: "4",
-    title: "Getting through the gates",
-    body: (
-      <>
-        UWM is working to certify every microservice for continuous deployment through PORT by the end of 2026. For 4
-        BOLT repositories I wrote the unit, integration, contract, smoke, and end-to-end suites they need to clear the
-        automated quality gates.
-      </>
-    ),
-  },
-  {
-    label: "Jira tickets delivered",
-    value: "70+",
-    title: "The day to day",
-    body: (
-      <>
-        A mix of high-priority production bugs and new feature work. I use Dynatrace to watch deployments and trace
-        root causes across the BOLT microservices.
+        My intern group took on code quality in BOLT. Across 34+ microservices we removed about 1,900 code smells and
+        raised test coverage from roughly 70% to over 80%, which won <strong>Most Valuable Project</strong> out of 16
+        intern groups. About 40 of those fixes, across 12 services, were mine.
       </>
     ),
   },

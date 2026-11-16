@@ -9,7 +9,7 @@ const description =
   "Software developer at United Wholesale Mortgage. I write the rules that read a loan and raise conditions for underwriters, and the tests that let them ship.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://alekseibeck.pages.dev"),
+  metadataBase: new URL("https://alekseibeckportfolio.pages.dev"),
   title: "Aleksei Beck | Software Developer",
   description,
   openGraph: {

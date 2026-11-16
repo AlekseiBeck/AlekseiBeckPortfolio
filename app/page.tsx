@@ -30,8 +30,8 @@ export default function Page() {
                 the underwriter.
               </p>
               <p>
-                This is a toy version that runs in your browser. The real ones are C# on NRules, and they track Freddie
-                Mac and investor guidelines. Pick a borrower, then change the file until every condition clears.
+                This is a toy version that runs in your browser. The real ones are C# on NRules and run on BOLT,
+                UWM&apos;s underwriting platform. Pick a borrower, then change the file until every condition clears.
               </p>
             </div>
           </SectionHead>
